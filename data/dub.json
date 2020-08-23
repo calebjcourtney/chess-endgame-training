@@ -1,0 +1,12 @@
+{
+	"authors": [
+		"calebjcourtney"
+	],
+	"copyright": "None",
+	"dependencies": {
+		"asdf": "~>0.6.2"
+	},
+	"description": "A minimal D application.",
+	"license": "None",
+	"name": "lichess_parser"
+}
