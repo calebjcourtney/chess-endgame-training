@@ -2,6 +2,8 @@
 
 This app was created as part of the Tech with Tim August `Timathon` challenge. The goal of the project is to create a lightweight application that can generate chess positions for finding checkmate in a certain number of moves.
 
+To view the fully deployed application on Heroku, you can connect to the link here: https://chess-endgame-trainer.herokuapp.com/
+
 ***
 ## Data Creation
 For more complete explanation on this, see the [data](https://github.com/calebjcourtney/chess-endgame-training/tree/master/data) folder. The majority of the work that went into this project was based on having to take chess games and parse out positions that were mate in a certain number of moves. Because of the large decision tree in chess, I could not find a fast way to generate this data ad hoc. Instead I used the [open database from lichess.org](database.lichess.org) and used games from actual players as the basis for the database.

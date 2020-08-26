@@ -138,7 +138,3 @@ def update_fen_text(mate_in_x: int) -> str:
     fen = df['fen'].tolist()[0]
 
     return fen
-
-
-if __name__ == '__main__':
-    app.run_server(debug=True)
