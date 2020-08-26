@@ -8,6 +8,7 @@ import sqlite3
 import chess
 import chess.pgn
 from tqdm import tqdm
+import pandas as pd
 
 mate_positions = {}
 games_scanned = 0
@@ -66,4 +67,28 @@ if len(inserts) > 0:
 
 
 con.commit()
+
+# get 10k random positions up to 10 moves to calculate mate, and put those in their own table
+cur.execute("DROP TABLE IF EXISTS data")
+
+for moves in range(1, 11):
+    sql = f"""
+        SELECT fen, moves
+        FROM positions
+        WHERE moves = {moves}
+        ORDER BY RANDOM()
+        LIMIT 10000
+    """
+
+    temp_df = pd.read_sql_query(sql, con)
+    temp_df.to_sql(
+        con = con,
+        name = "data",
+        index = False,
+        if_exists = "append"
+    )
+
+
+cur.execute("DROP TABLE IF EXISTS positions")
+
 con.close()
