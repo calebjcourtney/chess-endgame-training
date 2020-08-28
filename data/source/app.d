@@ -5,7 +5,7 @@ import std.regex;
 
 import asdf;
 
-// the basic components of a chess move - the move itself an the evaluation of the move
+// the basic components of a chess move - the move itself and the evaluation of the move
 struct Move
 {
     string eval;
@@ -44,7 +44,6 @@ bool isMoveText(string input_line)
     int line_start = to!int(input_line.indexOf("1"));
     return (line_start == 0);
 }
-
 
 
 // Find all the moves in the line. Parse out the evaluation and the clock time
