@@ -15,7 +15,7 @@ idna==2.10
 itsdangerous==1.1.0
 Jinja2==2.11.3
 MarkupSafe==1.1.1
-numpy==1.19.1
+numpy==1.22.0
 pandas==1.1.1
 plotly==4.9.0
 python-chess==0.31.3
