@@ -1,72 +1,70 @@
 """
-Reads through the chess JSON to parse the moves with comments that indicate a mate can be found from the given position.
+Reads through the chess PGN file and extracts all the locations where the eval is mate in x moves.
 """
 
 import json
+import re
 import sqlite3
+import sys
+from io import StringIO
 
 import chess
 import chess.pgn
 from tqdm import tqdm
 import pandas as pd
 
-mate_positions = {}
+mate_positions = set()
 games_scanned = 0
 
-moves_file = open("moves.jsonl")
-for line in moves_file:
-    moves = json.loads(line)
-    games_scanned += 1
+mate_pattern = re.compile(r"#(\d+)")
 
-    board = chess.Board()
-
-    for move in moves:
-        move_text = move['move'].replace("?", "").replace("!", "")
-        try:
-            board.push(board.parse_san(move_text))
-        except ValueError:
-            continue
-
-        if move["eval"] is not None and "#" in move["eval"] and board.turn:
-            mate_positions[board.fen()] = int(move["eval"].replace("#", ""))
-
-    board = chess.Board()
-
-    print(f"Games: {games_scanned} \t Mate Positions: {len(mate_positions)}", end = "\r")
-
-print(f"Games: {games_scanned} \t Mate Positions: {len(mate_positions)}")
-
-
-print("loading into sqlite")
-
-con = sqlite3.connect("db.sqlite3")
+con = sqlite3.connect("test_db.sqlite3")
 cur = con.cursor()
 
-cur.execute("""
+cur.execute(
+    """
     CREATE TABLE IF NOT EXISTS positions (
         fen TEXT,
         moves INT
     )
-""")
+"""
+)
 
+cur.execute("DELETE FROM positions")
 
-# insert the positions into the database 10k at a time
-inserts = []
-for fen, moves in tqdm(mate_positions.items()):
-    inserts.append([
-        fen,
-        moves
-    ])
+positions_to_insert = []
 
-    if len(inserts) == 10000:
-        cur.executemany(f"INSERT INTO positions (fen, moves) VALUES ({', '.join('?' for _ in inserts[0])})", inserts)
-        inserts = []
+for line in sys.stdin:
+    game = chess.pgn.read_game(StringIO(line))
 
-if len(inserts) > 0:
-    cur.executemany(f"INSERT INTO positions (fen, moves) VALUES ({', '.join('?' for _ in inserts[0])})", inserts)
+    games_scanned += 1
 
+    temp = game.board()
 
-con.commit()
+    for node in game.mainline():
+        temp.push(node.move)
+        if (
+            "#" in node.comment
+            and "#-" not in node.comment
+            and temp.turn == chess.WHITE
+        ):
+            mate_in_x = int(mate_pattern.search(node.comment).group(1))
+            fen = temp.fen()
+            if mate_in_x <= 10 and fen not in mate_positions:
+                positions_to_insert.append((fen, mate_in_x))
+                mate_positions.add(fen)
+
+    if len(positions_to_insert) >= 10000:
+        cur.executemany(
+            f"INSERT INTO positions (fen, moves) VALUES ({', '.join('?' for _ in positions_to_insert[0])})",
+            positions_to_insert,
+        )
+        con.commit()
+        positions_to_insert = []
+
+    print(f"Games: {games_scanned} \t Mate Positions: {len(mate_positions)}", end="\r")
+
+print(f"Games: {games_scanned} \t Mate Positions: {len(mate_positions)}")
 
 # get 10k random positions up to 10 moves to calculate mate, and put those in their own table
 cur.execute("DROP TABLE IF EXISTS data")
@@ -81,13 +79,7 @@ for moves in range(1, 11):
     """
 
     temp_df = pd.read_sql_query(sql, con)
-    temp_df.to_sql(
-        con = con,
-        name = "data",
-        index = False,
-        if_exists = "append"
-    )
-
+    temp_df.to_sql(con=con, name="data", index=False, if_exists="append")
 
 cur.execute("DROP TABLE IF EXISTS positions")
 
