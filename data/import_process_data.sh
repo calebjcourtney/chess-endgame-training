@@ -7,7 +7,7 @@ wget - i list.txt
 # run the python script for parsing the pgn into the database
 # this can take a very long time to run
 echo "parsing games and loading to database"
-zstdcat *.pgn.zst | grep 'eval' | grep '#' | grep -v '#-' | python process_games.py
+zstdcat *.pgn.zst | grep 'eval' | grep '#' | grep -v '#-' | poetry run python process_games.py
 
 # clean up the files used in processing
 # if running for the first time, I would recommend commenting these lines out,

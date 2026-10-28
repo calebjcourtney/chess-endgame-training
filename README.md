@@ -2,6 +2,15 @@
 
 This app was created as part of the Tech with Tim August `Timathon` challenge. The goal of the project is to create a lightweight application that can generate chess positions for finding checkmate in a certain number of moves.
 
+## Setup
+
+Install dependencies with Poetry, then start the app:
+
+```bash
+poetry install
+poetry run gunicorn app:server
+```
+
 To view the fully deployed application on Heroku, you can connect to the link here: https://chess-endgame-trainer.herokuapp.com/
 
 ***

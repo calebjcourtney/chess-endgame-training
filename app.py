@@ -16,9 +16,7 @@ import chess.svg
 
 # plotly libraries for creating the app
 import dash
-from dash.dependencies import Input, Output
-import dash_core_components as dcc
-import dash_html_components as html
+from dash import Input, Output, dcc, html
 
 # other 3rd party libraries
 import pandas as pd
